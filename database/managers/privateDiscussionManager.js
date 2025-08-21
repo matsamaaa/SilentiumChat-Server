@@ -14,6 +14,16 @@ class PrivateDiscussionManager {
         return discussion;
     }
 
+    /**
+     * @param {String} from 
+     * @param {String} to 
+     * @returns {PrivateDiscussion}
+     */
+
+    async getDiscussion(from, to) {
+        return await PrivateDiscussion.findOne({ from, to });
+    }
+
 }
 
 export default PrivateDiscussionManager;
