@@ -2,6 +2,12 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import Log from "./utils/logs/logs";
+import MessageManager from "./database/managers/messageManager";
+import dotenv from "dotenv";
+import connectToDatabase from "./database/connect";
+import bodyParser from "body-parser";
+
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -9,27 +15,51 @@ const io = new Server(server, {
     cors: { origin: "*" }, // autorise le front
 });
 
-io.on("connection", (socket) => {
-    Log.Debug("A user connected");
+(async () => {
+    await connectToDatabase();
 
-    socket.on("register", ({ userId, userToken, publicKey }) => {
-        // save public key
-    })
+    // api
+    app.use(bodyParser.json());
+    app.use('/auth', import('./routes/auth.js'));
 
-    socket.on("sendMessage", ({ to, encryptedMessage, nonce }) => {
-        // send the encrypted message to the recipient
+    // websocket
+    io.on("connection", (socket) => {
+        Log.Debug("A user connected");
 
-        // create a new message document
+        socket.on("register", ({ userId, userToken, publicKey }) => {
+            // save public key
 
-        // send to the recipient
-        socket.to(to).emit("receiveMessage", { from, encryptedMessage, nonce });
-    })
+            socket.userId = userId;
+            socket.publicKey = publicKey;
+        })
 
-    socket.on("disconnect", () => {
-        Log.Debug("A user disconnected");
+        // handle incoming messages
+        socket.on("sendMessage", ({ to, encryptedMessage, nonce }) => {
+            if (!socket.userId) {
+                Log.Error("Unauthorized: user not registered");
+                return;
+            }
+
+            const from = socket.userId;
+
+            // create a new message document
+            const message = new MessageManager().createMessage({
+                from,
+                to: '',
+                encryptedMessage,
+                nonce
+            });
+
+            // send to the recipient
+            socket.to(to).emit("receiveMessage", { from, encryptedMessage, nonce });
+        })
+
+        socket.on("disconnect", () => {
+            Log.Debug("A user disconnected");
+        });
     });
-});
 
-server.listen(30001, () => {
-    Log.Info("Server listening on port 30001");
-});
+    server.listen(30001, () => {
+        Log.Info("Server listening on port 30001");
+    });
+})();

@@ -9,8 +9,12 @@
   "author": "https://github.com/matsamaaa/",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
     "chalk": "^5.6.0",
+    "crypto": "^1.0.1",
     "dateformat": "^5.0.3",
+    "dotenv": "^17.2.1",
     "mongoose": "^8.17.2"
   }
 }

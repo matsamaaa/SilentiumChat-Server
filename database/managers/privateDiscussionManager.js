@@ -1,4 +1,4 @@
-import PrivateDiscussion from "../models/privateDiscussion";
+import PrivateDiscussion from "../models/privateDiscussionModel";
 
 class PrivateDiscussionManager {
 
