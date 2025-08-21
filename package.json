@@ -1,0 +1,16 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "https://github.com/matsamaaa/",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.6.0",
+    "dateformat": "^5.0.3",
+    "mongoose": "^8.17.2"
+  }
+}
