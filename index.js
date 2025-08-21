@@ -23,10 +23,10 @@ const io = new Server(server, {
     app.use('/auth', import('./routes/auth.js'));
 
     // websocket
-    io.on("connection", (socket) => {
+    io.on('connection', (socket) => {
         Log.Debug("A user connected");
 
-        socket.on("register", ({ userId, userToken, publicKey }) => {
+        socket.on('register', ({ userId, userToken, publicKey }) => {
             // save public key
 
             socket.userId = userId;
@@ -34,7 +34,7 @@ const io = new Server(server, {
         })
 
         // handle incoming messages
-        socket.on("sendMessage", ({ to, encryptedMessage, nonce }) => {
+        socket.on('sendMessage', ({ to, encryptedMessage, nonce }) => {
             if (!socket.userId) {
                 Log.Error("Unauthorized: user not registered");
                 return;
@@ -54,7 +54,7 @@ const io = new Server(server, {
             socket.to(to).emit("receiveMessage", { from, encryptedMessage, nonce });
         })
 
-        socket.on("disconnect", () => {
+        socket.on('disconnect', () => {
             Log.Debug("A user disconnected");
         });
     });

@@ -3,12 +3,12 @@ import Auth from "../models/authModel";
 
 class AuthManager {
 
-    static async createAuth(userId) {
+    static async createAuth(uniqueId) {
         try {
             const token = Token.generateToken();
 
             const auth = new Auth({
-                user: userId,
+                uniqueId: uniqueId,
                 token: token,
             });
 
@@ -20,9 +20,25 @@ class AuthManager {
         }
     }
 
+    async deleteAuth(uniqueId) {
+        try {
+            await Auth.deleteOne({ uniqueId: uniqueId });
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getAuth(token) {
         try {
             return await Auth.findOne({ token }).populate('User');
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async hasAuth(uniqueId) {
+        try {
+            return !!await Auth.findOne({ uniqueId: uniqueId });
         } catch (error) {
             throw error;
         }
