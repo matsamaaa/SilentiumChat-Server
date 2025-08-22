@@ -92,7 +92,7 @@ const io = new Server(server, {
             // send to the recipient
             const recipientSocketId = onlineSessions.get(to);
             if (recipientSocketId) {
-                socket.to(recipientSocketId).emit("receiveMessage", { from, encryptedMessage });
+                socket.to(recipientSocketId.id).emit("receiveMessage", { from, encryptedMessage });
             }
         })
 
