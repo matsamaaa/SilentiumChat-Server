@@ -6,6 +6,7 @@ import MessageManager from "./database/managers/messageManager.js";
 import dotenv from "dotenv";
 import connectToDatabase from "./database/connect.js";
 import bodyParser from "body-parser";
+import cors from "cors";
 
 // routes
 import authRoutes from './routes/auth.js';
@@ -14,10 +15,15 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: { origin: "*" }, // autorise le front
+
+app.use(cors({
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+const io = new Server(server, {
+    cors: { origin: "*" },
 });
 
 (async () => {
