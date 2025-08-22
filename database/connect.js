@@ -1,10 +1,9 @@
 import mongoose from 'mongoose';
-import Log from '../utils/logs/logs';
-import { URL_MONGO } from process.env;
+import Log from '../utils/logs/logs.js';
 
 const connectToDatabase = async () => {
     try {
-        await mongoose.connect(URL_MONGO, {
+        await mongoose.connect(process.env.URL_MONGO, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
