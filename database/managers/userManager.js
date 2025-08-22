@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 class UserManager {
     static async createUser({ email, username, tag, password, publicKey }) {
         try {
+            console.log(publicKey)
             const hashedPassword = await bcrypt.hash(password, 10);
 
             const user = new User({

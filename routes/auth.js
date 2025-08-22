@@ -30,6 +30,10 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ message: "Passwords do not match" });
     }
 
+    if (!publicKey || typeof publicKey !== 'string') {
+        return res.status(400).json({ message: "Invalid public key" });
+    }
+
     try {
         const user = await UserManager.createUser({ email, username, tag, password, publicKey });
         const auth = await AuthManager.createAuth(user.uniqueId);
