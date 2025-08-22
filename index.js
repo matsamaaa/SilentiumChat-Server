@@ -2,7 +2,7 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import Log from "./utils/logs/logs.js";
-import MessageManager from "./database/managers/messageManager.js";
+import PrivateDiscussionManager from "./database/managers/privateDiscussionManager.js";
 import dotenv from "dotenv";
 import connectToDatabase from "./database/connect.js";
 import bodyParser from "body-parser";
@@ -45,6 +45,7 @@ const io = new Server(server, {
             // save public key
 
             const auth = await AuthManager.isValidAuth(userId, userToken);
+            console.log(userId, userToken)
             if (!auth) {
                 Log.Error("Unauthorized: invalid userId or userToken");
                 return;
@@ -54,7 +55,7 @@ const io = new Server(server, {
             socket.userToken = userToken;
             socket.publicKey = await UserManager.getUserPublicKey(userId);
 
-            onlineSessions.set(userId, socket.id);
+            onlineSessions.set(userId, socket);
         })
 
         // handle incoming messages
@@ -64,24 +65,27 @@ const io = new Server(server, {
                 return;
             }
 
-            const auth = await AuthManager.isValidAuth(userId, userToken);
+            const from = socket.userId;
+            const auth = await AuthManager.isValidAuth(from, socket.userToken);
             if (!auth) {
                 Log.Error("Unauthorized: invalid userId or userToken");
                 return;
             }
 
-            const from = socket.userId;
-
             // create a new message document
-            const message = new MessageManager().createMessage({
+            const message = {
                 from,
                 to,
                 encryptedMessage,
                 nonce
-            });
+            };
 
+            let discussion = await PrivateDiscussionManager.getDiscussion(from, to);
+            discussion = discussion || await PrivateDiscussionManager.createDiscussion(from, to);
+
+            await PrivateDiscussionManager.addMessage(discussion._id, message);
+            
             // send to the recipient
-            // soit verifier si le destinataire est en ligne
             const recipientSocketId = onlineSessions.get(to);
             if (recipientSocketId) {
                 socket.to(recipientSocketId).emit("receiveMessage", { from, encryptedMessage, nonce });
@@ -90,6 +94,8 @@ const io = new Server(server, {
 
         socket.on('disconnect', () => {
             onlineSessions.delete(socket.userId);
+
+            Log.Debug("A user disconnected");
         });
     });
 

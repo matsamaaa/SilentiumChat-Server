@@ -64,7 +64,7 @@ router.post('/login', async (req, res) => {
 
         // check if user has auth
         const hasAuth = await AuthManager.hasAuth(user.uniqueId);
-        if (!hasAuth) {
+        if (hasAuth) {
             // delete it to create a new auth
             await AuthManager.deleteAuth(user.uniqueId);
         }

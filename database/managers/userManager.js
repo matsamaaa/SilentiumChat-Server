@@ -5,7 +5,6 @@ import bcrypt from "bcrypt";
 class UserManager {
     static async createUser({ email, username, tag, password, publicKey }) {
         try {
-            console.log(publicKey)
             const hashedPassword = await bcrypt.hash(password, 10);
 
             const user = new User({
@@ -54,7 +53,7 @@ class UserManager {
 
     static async getUserPublicKey(userId) {
         try {
-            const user = await User.findById(userId);
+            const user = await User.findOne({ uniqueId: userId });
             return user ? user.publicKey : null;
         } catch (error) {
             throw new Error("Database error");
