@@ -51,6 +51,15 @@ class UserManager {
             throw new Error("Database error");
         }
     }
+
+    static async getUserPublicKey(userId) {
+        try {
+            const user = await User.findById(userId);
+            return user ? user.publicKey : null;
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
 }
 
 export default UserManager;

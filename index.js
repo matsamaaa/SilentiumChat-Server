@@ -10,6 +10,8 @@ import cors from "cors";
 
 // routes
 import authRoutes from './routes/auth.js';
+import UserManager from "./database/managers/userManager.js";
+import AuthManager from "./database/managers/authManager.js";
 
 dotenv.config();
 
@@ -34,20 +36,37 @@ const io = new Server(server, {
     app.use('/auth', authRoutes);
 
     // websocket
+    const onlineSessions = new Map();
+
     io.on('connection', (socket) => {
         Log.Debug("A user connected");
 
-        socket.on('register', ({ userId, userToken, publicKey }) => {
+        socket.on('register', async ({ userId, userToken }) => {
             // save public key
 
+            const auth = await AuthManager.isValidAuth(userId, userToken);
+            if (!auth) {
+                Log.Error("Unauthorized: invalid userId or userToken");
+                return;
+            }
+
             socket.userId = userId;
-            socket.publicKey = publicKey;
+            socket.userToken = userToken;
+            socket.publicKey = await UserManager.getUserPublicKey(userId);
+
+            onlineSessions.set(userId, socket.id);
         })
 
         // handle incoming messages
-        socket.on('sendMessage', ({ to, encryptedMessage, nonce }) => {
-            if (!socket.userId) {
+        socket.on('sendMessage', async ({ to, encryptedMessage, nonce }) => {
+            if (!socket.userId || !socket.userToken) {
                 Log.Error("Unauthorized: user not registered");
+                return;
+            }
+
+            const auth = await AuthManager.isValidAuth(userId, userToken);
+            if (!auth) {
+                Log.Error("Unauthorized: invalid userId or userToken");
                 return;
             }
 
@@ -56,17 +75,21 @@ const io = new Server(server, {
             // create a new message document
             const message = new MessageManager().createMessage({
                 from,
-                to: '',
+                to,
                 encryptedMessage,
                 nonce
             });
 
             // send to the recipient
-            socket.to(to).emit("receiveMessage", { from, encryptedMessage, nonce });
+            // soit verifier si le destinataire est en ligne
+            const recipientSocketId = onlineSessions.get(to);
+            if (recipientSocketId) {
+                socket.to(recipientSocketId).emit("receiveMessage", { from, encryptedMessage, nonce });
+            }
         })
 
         socket.on('disconnect', () => {
-            Log.Debug("A user disconnected");
+            onlineSessions.delete(socket.userId);
         });
     });
 

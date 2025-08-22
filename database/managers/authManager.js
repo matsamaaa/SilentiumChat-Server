@@ -44,6 +44,15 @@ class AuthManager {
         }
     }
 
+    static async isValidAuth(uniqueId, token) {
+        try {
+            const auth = await Auth.findOne({ uniqueId, token });
+            return !!auth;
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
 
 export default AuthManager;
