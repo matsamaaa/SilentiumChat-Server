@@ -2,16 +2,19 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import Log from "./utils/logs/logs.js";
-import PrivateDiscussionManager from "./database/managers/privateDiscussionManager.js";
 import dotenv from "dotenv";
-import connectToDatabase from "./database/connect.js";
 import bodyParser from "body-parser";
 import cors from "cors";
 
 // routes
 import authRoutes from './routes/auth.js';
+import userRoutes from './routes/user.js';
+
+// managers
+import connectToDatabase from "./database/connect.js";
 import UserManager from "./database/managers/userManager.js";
 import AuthManager from "./database/managers/authManager.js";
+import PrivateDiscussionManager from "./database/managers/privateDiscussionManager.js";
 
 dotenv.config();
 
@@ -34,6 +37,7 @@ const io = new Server(server, {
     // api
     app.use(bodyParser.json());
     app.use('/auth', authRoutes);
+    app.use('/user', userRoutes);
 
     // websocket
     const onlineSessions = new Map();
@@ -59,7 +63,8 @@ const io = new Server(server, {
         })
 
         // handle incoming messages
-        socket.on('sendMessage', async ({ to, encryptedMessage, nonce }) => {
+        socket.on('sendMessage', async ({ to, encryptedMessage }) => {
+            console.log('message received', encryptedMessage)
             if (!socket.userId || !socket.userToken) {
                 Log.Error("Unauthorized: user not registered");
                 return;
@@ -76,8 +81,7 @@ const io = new Server(server, {
             const message = {
                 from,
                 to,
-                encryptedMessage,
-                nonce
+                encryptedMessage
             };
 
             let discussion = await PrivateDiscussionManager.getDiscussion(from, to);
@@ -88,7 +92,7 @@ const io = new Server(server, {
             // send to the recipient
             const recipientSocketId = onlineSessions.get(to);
             if (recipientSocketId) {
-                socket.to(recipientSocketId).emit("receiveMessage", { from, encryptedMessage, nonce });
+                socket.to(recipientSocketId).emit("receiveMessage", { from, encryptedMessage });
             }
         })
 
