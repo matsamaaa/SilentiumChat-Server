@@ -7,12 +7,17 @@ import dotenv from "dotenv";
 import connectToDatabase from "./database/connect.js";
 import bodyParser from "body-parser";
 
+// routes
+import authRoutes from './routes/auth.js';
+
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: { origin: "*" }, // autorise le front
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 });
 
 (async () => {
@@ -20,7 +25,7 @@ const io = new Server(server, {
 
     // api
     app.use(bodyParser.json());
-    app.use('/auth', import('./routes/auth.js'));
+    app.use('/auth', authRoutes);
 
     // websocket
     io.on('connection', (socket) => {
