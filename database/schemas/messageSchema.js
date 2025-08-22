@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { type } from 'os';
 
 const messageSchema = new mongoose.Schema({
     from: { type: String, required: true },

@@ -1,10 +1,10 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
-import Log from "./utils/logs/logs";
-import MessageManager from "./database/managers/messageManager";
+import Log from "./utils/logs/logs.js";
+import MessageManager from "./database/managers/messageManager.js";
 import dotenv from "dotenv";
-import connectToDatabase from "./database/connect";
+import connectToDatabase from "./database/connect.js";
 import bodyParser from "body-parser";
 
 dotenv.config();

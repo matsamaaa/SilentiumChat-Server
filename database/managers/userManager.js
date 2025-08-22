@@ -1,5 +1,5 @@
-import Ids from "../../utils/generate/ids";
-import User from "../models/userModel";
+import Ids from "../../utils/generate/ids.js";
+import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
 
 class UserManager {

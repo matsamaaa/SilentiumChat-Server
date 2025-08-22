@@ -1,4 +1,4 @@
-import AuthManager from "../database/managers/authManager";
+import AuthManager from "../database/managers/authManager.js";
 
 const validateToken = async (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];

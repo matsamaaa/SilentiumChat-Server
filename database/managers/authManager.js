@@ -1,5 +1,5 @@
-import Token from "../../utils/generate/tokens";
-import Auth from "../models/authModel";
+import Token from "../../utils/generate/tokens.js";
+import Auth from "../models/authModel.js";
 
 class AuthManager {
 

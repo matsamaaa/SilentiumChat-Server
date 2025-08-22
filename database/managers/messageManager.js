@@ -1,4 +1,4 @@
-import messageSchema from "../schemas/messageSchema";
+import messageSchema from "../schemas/messageSchema.js";
 
 class MessageManager {
 
