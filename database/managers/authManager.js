@@ -20,7 +20,7 @@ class AuthManager {
         }
     }
 
-    async deleteAuth(uniqueId) {
+    static async deleteAuth(uniqueId) {
         try {
             await Auth.deleteOne({ uniqueId: uniqueId });
         } catch (error) {
@@ -28,7 +28,7 @@ class AuthManager {
         }
     }
 
-    async getAuth(token) {
+    static async getAuth(token) {
         try {
             return await Auth.findOne({ token }).populate('User');
         } catch (error) {
@@ -36,7 +36,7 @@ class AuthManager {
         }
     }
 
-    async hasAuth(uniqueId) {
+    static async hasAuth(uniqueId) {
         try {
             return !!await Auth.findOne({ uniqueId: uniqueId });
         } catch (error) {

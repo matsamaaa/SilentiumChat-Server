@@ -73,6 +73,7 @@ router.post('/login', async (req, res) => {
         const auth = await AuthManager.createAuth(user.uniqueId);
         return res.status(200).json({ message: "Login successful", token: auth.token, user: user });
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ message: "Internal server error" });
     }
 })
