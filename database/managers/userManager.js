@@ -59,6 +59,15 @@ class UserManager {
             throw new Error("Database error");
         }
     }
+
+    static async getUsername(userId) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            return user ? user.username : null;
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
 }
 
 export default UserManager;

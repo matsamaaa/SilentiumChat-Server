@@ -9,12 +9,14 @@ import cors from "cors";
 // routes
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/user.js';
+import messageRoute from './routes/message.js';
 
 // managers
 import connectToDatabase from "./database/connect.js";
 import UserManager from "./database/managers/userManager.js";
 import AuthManager from "./database/managers/authManager.js";
 import PrivateDiscussionManager from "./database/managers/privateDiscussionManager.js";
+import { time, timeStamp } from "console";
 
 dotenv.config();
 
@@ -24,7 +26,7 @@ const server = http.createServer(app);
 app.use(cors({
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization", "x-user-id"]
 }));
 
 const io = new Server(server, {
@@ -38,6 +40,7 @@ const io = new Server(server, {
     app.use(bodyParser.json());
     app.use('/auth', authRoutes);
     app.use('/user', userRoutes);
+    app.use('/message', messageRoute);
 
     // websocket
     const onlineSessions = new Map();
@@ -49,7 +52,6 @@ const io = new Server(server, {
             // save public key
 
             const auth = await AuthManager.isValidAuth(userId, userToken);
-            console.log(userId, userToken)
             if (!auth) {
                 Log.Error("Unauthorized: invalid userId or userToken");
                 return;
@@ -63,8 +65,7 @@ const io = new Server(server, {
         })
 
         // handle incoming messages
-        socket.on('sendMessage', async ({ to, encryptedMessage }) => {
-            console.log('message received', encryptedMessage)
+        socket.on('sendMessage', async ({ to, encryptedMessage, encryptedMessageBySender }) => {
             if (!socket.userId || !socket.userToken) {
                 Log.Error("Unauthorized: user not registered");
                 return;
@@ -81,7 +82,9 @@ const io = new Server(server, {
             const message = {
                 from,
                 to,
-                encryptedMessage
+                encryptedMessage,
+                encryptedMessageBySender,
+                timestamp: new Date(),
             };
 
             let discussion = await PrivateDiscussionManager.getDiscussion(from, to);
@@ -92,7 +95,7 @@ const io = new Server(server, {
             // send to the recipient
             const recipientSocketId = onlineSessions.get(to);
             if (recipientSocketId) {
-                socket.to(recipientSocketId.id).emit("receiveMessage", { from, encryptedMessage });
+                socket.to(recipientSocketId.id).emit("receiveMessage", message);
             }
         })
 

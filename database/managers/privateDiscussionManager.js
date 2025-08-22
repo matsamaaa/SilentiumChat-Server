@@ -10,7 +10,7 @@ class PrivateDiscussionManager {
      */
 
     static async createDiscussion(from, to) {
-        const discussion = new PrivateDiscussion({ from, to });
+        const discussion = new PrivateDiscussion({ users: [from, to] });
         await discussion.save();
         return discussion;
     }
@@ -23,7 +23,12 @@ class PrivateDiscussionManager {
      */
 
     static async getDiscussion(from, to) {
-        return await PrivateDiscussion.findOne({ from, to });
+        return await PrivateDiscussion.findOne({ 
+            users: { 
+                $all: [from, to],
+                $size: 2
+            } 
+        });
     }
 
     static async addMessage(discussionId, message) {
