@@ -11,7 +11,7 @@ router.get('/:userId/messages', validateToken, async (req, res) => {
     try {
         const discussion = await PrivateDiscussionManager.getDiscussion(from, userId);
         if(!discussion) {
-            return res.status(200).json({ from, to: userId, encryptedMessages: [] });
+            return res.status(200).json({ users: [from, userId], encryptedMessages: [] });
         }
 
         return res.status(200).json(discussion);

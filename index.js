@@ -46,7 +46,7 @@ const io = new Server(server, {
     const onlineSessions = new Map();
 
     io.on('connection', (socket) => {
-        Log.Debug("A user connected");
+        Log.Debug("user connected");
 
         socket.on('register', async ({ userId, userToken }) => {
             // save public key
@@ -102,7 +102,7 @@ const io = new Server(server, {
         socket.on('disconnect', () => {
             onlineSessions.delete(socket.userId);
 
-            Log.Debug("A user disconnected");
+            Log.Debug("user disconnected");
         });
     });
 

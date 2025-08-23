@@ -21,7 +21,6 @@ router.get('/:userId/username', async (req, res) => {
         const username = await UserManager.getUsername(userId);
         res.json({ username });
     } catch (error) {
-        console.log("Error fetching user username:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
