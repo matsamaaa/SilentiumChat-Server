@@ -21,4 +21,16 @@ router.get('/:userId/messages', validateToken, async (req, res) => {
     }
 });
 
+router.get('/lastmessages', validateToken, async (req, res) => {
+    const userId = req.headers['x-user-id'];
+
+    try {
+        const lastMessages = await PrivateDiscussionManager.getLastMessages(userId);
+        return res.status(200).json(lastMessages);
+    } catch (error) {
+        Log.Error("Error fetching last messages:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 export default router;

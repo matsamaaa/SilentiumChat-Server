@@ -31,6 +31,22 @@ class PrivateDiscussionManager {
         });
     }
 
+    static async getLastMessages(userId) {
+        const discussions = await PrivateDiscussion.find({
+            users: userId,
+            $expr: { $eq: [{ $size: "$users" }, 2] }
+        }).sort({ updatedAt: -1 }).limit(10);
+
+        // For each discussion, keep only the last encryptedMessage
+        return discussions.map(discussion => {
+            const lastMessage = discussion.encryptedMessages.slice(-1);
+            return {
+                ...discussion.toObject(),
+                encryptedMessages: lastMessage
+            };
+        });
+    }
+
     static async addMessage(discussionId, message) {
         const discussion = await PrivateDiscussion.findById(discussionId);
         if (!discussion) throw new Error("Discussion not found");

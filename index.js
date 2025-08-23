@@ -17,6 +17,7 @@ import UserManager from "./database/managers/userManager.js";
 import AuthManager from "./database/managers/authManager.js";
 import PrivateDiscussionManager from "./database/managers/privateDiscussionManager.js";
 import { time, timeStamp } from "console";
+import MessageManager from "./database/managers/messageManager.js";
 
 dotenv.config();
 
@@ -79,13 +80,14 @@ const io = new Server(server, {
             }
 
             // create a new message document
-            const message = {
-                from,
-                to,
-                encryptedMessage,
-                encryptedMessageBySender,
-                timestamp: new Date(),
-            };
+            const message = new MessageManager().createMessage(
+                from, 
+                to, 
+                encryptedMessage, 
+                encryptedMessageBySender, 
+                await UserManager.getUserPublicKey(to), 
+                socket.publicKey
+            );
 
             let discussion = await PrivateDiscussionManager.getDiscussion(from, to);
             discussion = discussion || await PrivateDiscussionManager.createDiscussion(from, to);
