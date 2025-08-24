@@ -1,6 +1,7 @@
 import express from 'express';
 import PrivateDiscussionManager from '../database/managers/privateDiscussionManager.js';
 import { validateToken } from '../middleware/auth.js';
+import Log from '../utils/logs/logs.js';
 
 const router = express.Router();
 

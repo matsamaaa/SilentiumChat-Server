@@ -35,13 +35,13 @@ class PrivateDiscussionManager {
         const discussions = await PrivateDiscussion.find({
             users: userId,
             $expr: { $eq: [{ $size: "$users" }, 2] }
-        }).sort({ updatedAt: -1 }).limit(10);
+        }).sort({ updatedAt: -1 }).limit(10).lean();
 
         // For each discussion, keep only the last encryptedMessage
         return discussions.map(discussion => {
             const lastMessage = discussion.encryptedMessages.slice(-1);
             return {
-                ...discussion.toObject(),
+                ...discussion,
                 encryptedMessages: lastMessage
             };
         });
