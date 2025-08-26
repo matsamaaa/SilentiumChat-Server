@@ -7,6 +7,8 @@ const messageSchema = new mongoose.Schema({
     encryptedMessageBySender: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
 
+    files: [{ type: mongoose.Schema.Types.ObjectId }],
+
     isRead: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
     isPinned: { type: Boolean, default: false },

@@ -3,7 +3,9 @@ class MessageManager {
         this.message = {
             from: null,
             to: null,
-            
+
+            files: [],
+
             encryptedMessage: null,
             encryptedMessageBySender: null,
 
@@ -20,6 +22,15 @@ class MessageManager {
         this.message.publicKeyUsed = publicKeyUsed;
         this.message.publicKeySenderUsed = publicKeySenderUsed;
 
+        return this.message;
+    }
+
+    addFile(fileId) {
+        this.message.files.push(fileId);
+        return this.message
+    }
+
+    getMessage() {
         return this.message;
     }
 }

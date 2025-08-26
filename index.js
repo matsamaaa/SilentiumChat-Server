@@ -10,13 +10,13 @@ import cors from "cors";
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/user.js';
 import messageRoute from './routes/message.js';
+import filesRoute from './routes/files.js';
 
 // managers
 import connectToDatabase from "./database/connect.js";
 import UserManager from "./database/managers/userManager.js";
 import AuthManager from "./database/managers/authManager.js";
 import PrivateDiscussionManager from "./database/managers/privateDiscussionManager.js";
-import { time, timeStamp } from "console";
 import MessageManager from "./database/managers/messageManager.js";
 
 dotenv.config();
@@ -42,6 +42,7 @@ const io = new Server(server, {
     app.use('/auth', authRoutes);
     app.use('/user', userRoutes);
     app.use('/message', messageRoute);
+    app.use('/files', filesRoute);
 
     // websocket
     const onlineSessions = new Map();
@@ -66,7 +67,7 @@ const io = new Server(server, {
         })
 
         // handle incoming messages
-        socket.on('sendMessage', async ({ to, encryptedMessage, encryptedMessageBySender }) => {
+        socket.on('sendMessage', async ({ to, encryptedMessage, encryptedMessageBySender, file}) => {
             if (!socket.userId || !socket.userToken) {
                 Log.Error("Unauthorized: user not registered");
                 return;
@@ -80,7 +81,8 @@ const io = new Server(server, {
             }
 
             // create a new message document
-            const message = new MessageManager().createMessage(
+            const message = new MessageManager();
+            message.createMessage(
                 from, 
                 to, 
                 encryptedMessage, 
@@ -88,16 +90,19 @@ const io = new Server(server, {
                 await UserManager.getUserPublicKey(to), 
                 socket.publicKey
             );
+            if (file) message.addFile(file);
+
+            const finalMessage = message.getMessage();
 
             let discussion = await PrivateDiscussionManager.getDiscussion(from, to);
             discussion = discussion || await PrivateDiscussionManager.createDiscussion(from, to);
 
-            await PrivateDiscussionManager.addMessage(discussion._id, message);
+            await PrivateDiscussionManager.addMessage(discussion._id, finalMessage);
             
             // send to the recipient
             const recipientSocketId = onlineSessions.get(to);
             if (recipientSocketId) {
-                socket.to(recipientSocketId.id).emit("receiveMessage", message);
+                socket.to(recipientSocketId.id).emit("receiveMessage", finalMessage);
             }
         })
 
