@@ -4,6 +4,9 @@
 .cache
 dist
 
+# src
+/src
+
 # Node dependencies
 node_modules
 
