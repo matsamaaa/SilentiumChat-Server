@@ -6,6 +6,7 @@ const fileSchema = new mongoose.Schema({
     metadata: {
         iv: { type: String, default: null },
         authTag: { type: String, default: null },
+        extension: { type: String, default: null},
         encryptedKey: { type: String, default: null },
         encryptedKeySender: { type: String, default: null }
     }

@@ -7,7 +7,7 @@ class FileManager {
         return file;    
     }
 
-    static async addDataToFile(_id, contentType, iv, authTag, encryptedKey, encryptedKeySender) {
+    static async addDataToFile(_id, contentType, iv, authTag, extension,encryptedKey, encryptedKeySender) {
         const file = await File.findById(_id);
         if (!file) {
             throw new Error("File not found");
@@ -18,6 +18,7 @@ class FileManager {
         file.metadata = {
             iv,
             authTag,
+            extension,
             encryptedKey,
             encryptedKeySender
         };

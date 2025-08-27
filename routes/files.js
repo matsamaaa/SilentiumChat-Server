@@ -30,7 +30,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/upload', validateToken, createMongoFile, upload.single('file'), async (req, res) => {
-    const { iv, authTag, encryptedKey, encryptedKeySender } = req.body;
+    const { iv, authTag, extension, encryptedKey, encryptedKeySender } = req.body;
     const file = req.file;
 
     if (!file) {
@@ -45,6 +45,7 @@ router.post('/upload', validateToken, createMongoFile, upload.single('file'), as
         contentType,
         iv,
         authTag,
+        extension,
         encryptedKey,
         encryptedKeySender
     );
@@ -60,7 +61,6 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const { id } = req.params;
         const fileDoc = await FileManager.getFileById(id);
 
         if (!fileDoc) return res.status(404).json({ error: "File not found" });
@@ -86,7 +86,7 @@ router.get('/:id/meta', async (req, res) => {
 
         if (!fileDoc) return res.status(404).json({ error: "File not found" });
 
-        res.json(fileDoc.metadata);
+        res.json({ ...fileDoc.metadata, name: fileDoc.filename });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: "Internal Server Error" });
