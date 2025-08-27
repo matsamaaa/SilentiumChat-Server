@@ -113,7 +113,7 @@ const io = new Server(server, {
         });
     });
 
-    server.listen(30001, () => {
-        Log.Info("Server listening on port 30001");
+    server.listen(process.env.PORT, () => {
+        Log.Info(`Server listening on port ${process.env.PORT}`);
     });
 })();

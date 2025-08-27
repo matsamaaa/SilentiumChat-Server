@@ -1,81 +1,77 @@
 import express from 'express';
 import multer from 'multer';
-import mongoose from 'mongoose';
 import { validateToken } from '../middleware/auth.js';
+import FileManager from '../database/managers/filleManager.js';
+import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
-const upload = multer();
 
-let gfsBucket;
+async function createMongoFile(req, res, next) {
+    try {
+        const newFile = await FileManager.createFile();
+        req.mongoFile = newFile; // on stocke le doc dans la req
+        next();
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Failed to create DB entry" });
+    }
+}
 
-mongoose.connection.once('open', () => {
-    gfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
-        bucketName: 'uploads'
-    });
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(process.cwd(), process.env.UPLOAD_DIR));
+    },
+    filename: (req, file, cb) => {
+        cb(null, req.mongoFile._id.toString());
+    }
 });
 
-router.post('/upload', validateToken, upload.single('file'), (req, res) => {
-    try {
-        if (!gfsBucket) {
-            return res.status(500).json({ error: "GridFSBucket not initialized" });
-        }
+const upload = multer({ storage });
 
-        const file = req.file;
-        const { to, iv, authTag, encryptedKey, encryptedKeySender } = req.body;
+router.post('/upload', validateToken, createMongoFile, upload.single('file'), async (req, res) => {
+    const { iv, authTag, encryptedKey, encryptedKeySender } = req.body;
+    const file = req.file;
 
-        if (!file) {
-            return res.status(400).json({ error: "No file uploaded" });
-        }
-
-        const contentType = file.mimetype || 'application/octet-stream';
-
-        const uploadStream = gfsBucket.openUploadStream(file.originalname || 'encryptedFile', {
-            contentType,
-            metadata: {
-                to,
-                iv,
-                authTag,
-                encryptedKey,
-                encryptedKeySender
-            }
-        });
-
-        uploadStream.end(file.buffer);
-
-        uploadStream.on('finish', () => {
-            return res.json({
-                success: true,
-                fileId: uploadStream.id
-            });
-        });
-
-        uploadStream.on('error', (error) => {
-            return res.status(500).json({ error: "Error uploading file" });
-        });
-    } catch (error) {
-        return res.status(500).json({ error: "Internal Server Error" });
+    if (!file) {
+        return res.status(400).json({ error: "No file uploaded" });
     }
+
+    const contentType = file.mimetype || 'application/octet-stream';
+
+    // create mongo File
+    const updatedFile = await FileManager.addDataToFile(
+        req.mongoFile._id,
+        contentType,
+        iv,
+        authTag,
+        encryptedKey,
+        encryptedKeySender
+    );
+
+    // return response
+    return res.json({
+        success: true,
+        fileId: updatedFile._id
+    });
 });
 
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
-    console.log(id);
+
     try {
-        const file = await gfsBucket.find({ _id: new mongoose.Types.ObjectId(id) }).toArray();
+        const { id } = req.params;
+        const fileDoc = await FileManager.getFileById(id);
 
-        if (!file || file.length === 0) {
-            return res.status(404).json({ error: "File not found" });
-        }
+        if (!fileDoc) return res.status(404).json({ error: "File not found" });
 
-        res.set("Content-Type", file[0].contentType);
-        res.set("Content-Disposition", `attachment; filename="${file[0].filename}"`);
+        const filePath = path.join(process.env.UPLOAD_DIR, fileDoc._id.toString());
+        if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found on disk" });
 
-        const downloadStream = gfsBucket.openDownloadStream(file[0]._id);
-        downloadStream.pipe(res);
+        res.setHeader("Content-Type", fileDoc.contentType || "application/octet-stream");
+        res.setHeader("Content-Disposition", `attachment; filename="${fileDoc._id.toString()}"`);
 
-        downloadStream.on('error', (error) => {
-            return res.status(500).json({ error: "Error downloading file" });
-        });
+        fs.createReadStream(filePath).pipe(res);
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: "Internal Server Error" });
@@ -86,13 +82,11 @@ router.get('/:id/meta', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const file = await gfsBucket.find({ _id: new mongoose.Types.ObjectId(id) }).toArray();
+        const fileDoc = await FileManager.getFileById(id);
 
-        if (!file || file.length === 0) {
-            return res.status(404).json({ error: "File not found" });
-        }
+        if (!fileDoc) return res.status(404).json({ error: "File not found" });
 
-        res.json(file[0].metadata);
+        res.json(fileDoc.metadata);
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: "Internal Server Error" });
