@@ -56,6 +56,30 @@ class PrivateDiscussionManager {
         return discussion;
     }
 
+    static async updateDiscussionStatus(from, to, status) {
+        const discussion = await PrivateDiscussion.findOne({ users: { $all: [from, to] } });
+        if (!discussion) throw new Error("Discussion not found");
+
+        if (discussion.encryptedMessages[0].from !== to) {
+            throw new Error("Only the recipient can update the status");
+        }
+
+        if (discussion.isWaitingForResponse !== null) {
+            throw new Error("Discussion status has already been set");
+        }
+
+        if (status === 'accepted') {
+            discussion.isWaitingForResponse = true;
+        } else if (status === 'refused') {
+            discussion.isWaitingForResponse = false;
+        } else {
+            throw new Error("Invalid status value");
+        }
+
+        await discussion.save();
+        return discussion;
+    }
+
 }
 
 export default PrivateDiscussionManager;

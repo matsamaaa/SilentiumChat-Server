@@ -13,6 +13,7 @@ const privateDiscussionSchema = new mongoose.Schema({
         }
     },
     encryptedMessages: { type: [messageSchema], required: true, default: [] },
+    isWaitingForResponse: { type: Boolean, default: null }, // true: accepted, false: refused, null: no response yet
 });
 
 const PrivateDiscussion = mongoose.model('PrivateDiscussion', privateDiscussionSchema);

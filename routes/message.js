@@ -34,4 +34,20 @@ router.get('/lastmessages', validateToken, async (req, res) => {
     }
 });
 
+router.patch('/:userId/status', validateToken, async (req, res) => {
+    const { userId } = req.params;
+    const from = req.user;
+    if (!['accepted', 'refused'].includes(req.body.status)) {
+        return res.status(400).json({ error: "Invalid status value" });
+    }
+
+    try {
+        const updatedDiscussion = await PrivateDiscussionManager.updateDiscussionStatus(from, userId, req.body.status);
+        return res.status(200).json(updatedDiscussion);
+    } catch (error) {
+        Log.Error("Error updating discussion status:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 export default router;

@@ -10,8 +10,9 @@ class Log {
      * @param {String} message 
      */
 
-    static Error(message) {
+    static Error(message, error) {
         console.error(`${chalk.bgRed.white.bold(' ERROR ')} [${Log.Date()}] » ` + message)
+        console.error(error);
     }
 
     static Warn(message) {
