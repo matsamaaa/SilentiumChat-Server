@@ -1,10 +1,11 @@
 import express from 'express';
 import UserManager from '../database/managers/userManager.js';
 import Log from '../utils/logs/logs.js';
+import { validateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/:userId/publicKey', async (req, res) => {
+router.get('/:userId/publicKey', validateToken, async (req, res) => {
     const { userId } = req.params;
     try {
         const publicKey = await UserManager.getUserPublicKey(userId);
@@ -15,7 +16,7 @@ router.get('/:userId/publicKey', async (req, res) => {
     }
 });
 
-router.get('/:username/:code/id', async (req, res) => {
+router.get('/:username/:code/id', validateToken, async (req, res) => {
     const { username, code } = req.params;
     try {
         const user = await UserManager.getUserByFullUsername(username, Number(code));
@@ -26,7 +27,7 @@ router.get('/:username/:code/id', async (req, res) => {
     }
 });
 
-router.get('/:userId/username', async (req, res) => {
+router.get('/:userId/username', validateToken, async (req, res) => {
     const { userId } = req.params;
     try {
         const username = await UserManager.getUsername(userId);

@@ -8,12 +8,11 @@ const router = express.Router();
 router.get('/:userId/messages', validateToken, async (req, res) => {
     const { userId } = req.params; // recipient user
     const from = req.user;
-
     try {
         const discussion = await PrivateDiscussionManager.getDiscussion(from, userId);
         if(!discussion) {
             return res.status(200).json({ users: [from, userId], encryptedMessages: [] });
-        }
+        }   
 
         return res.status(200).json(discussion);
     } catch (error) {

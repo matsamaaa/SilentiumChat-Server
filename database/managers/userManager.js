@@ -68,6 +68,34 @@ class UserManager {
             throw new Error("Database error");
         }
     }
+
+    static async updateUsername(userId, newUsername) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            user.username = newUsername;
+            await user.save();
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
+
+    static async updateTag(userId, newTag) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            user.tag = newTag;
+            await user.save();
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
 }
 
 export default UserManager;
