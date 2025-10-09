@@ -119,6 +119,18 @@ class UserManager {
             throw new Error("Database error");
         }
     }
+
+    static async deleteAvatar(userId) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            if (!user) throw new Error('User not found')
+
+            user.avatar = null;
+            await user.save();
+        } catch (err) {
+            throw new Error("Database error");
+        }
+    }
 }
 
 export default UserManager;

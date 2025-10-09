@@ -81,12 +81,11 @@ router.post('/avatar', validateToken, upload.single('avatar'), async (req, res) 
 });
 
 router.get('/avatar', validateToken, async (req, res) => {
-    const { id } = req.params;
-    const user = req.user || id;
+    const user = req.user;
     try {
         const fileDoc = await UserManager.getAvatar(user);
 
-        if (!fileDoc) return res.status(404).json({ error: "File not found" });
+        if (!fileDoc) return res.status(204).json({ error: "No avatar uploaded" });
 
         const filePath = path.join(process.env.UPLOAD_DIR, 'avatars', user);
         if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found on disk" });
@@ -109,5 +108,16 @@ router.get('/avatar', validateToken, async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.delete('/avatar', validateToken, async (req, res) => {
+    const user = req.user;
+    try {
+        await UserManager.deleteAvatar(user);
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Error deleting avatar:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+})
 
 export default router;
