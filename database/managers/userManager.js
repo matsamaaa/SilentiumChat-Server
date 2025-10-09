@@ -96,6 +96,20 @@ class UserManager {
             throw new Error("Database error");
         }
     }
+
+    static async uploadAvatar(userId, fileName) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            user.avatar = fileName;
+            await user.save();
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
 }
 
 export default UserManager;
