@@ -80,4 +80,34 @@ router.post('/avatar', validateToken, upload.single('avatar'), async (req, res) 
     }
 });
 
+router.get('/avatar', validateToken, async (req, res) => {
+    const { id } = req.params;
+    const user = req.user || id;
+    try {
+        const fileDoc = await UserManager.getAvatar(user);
+
+        if (!fileDoc) return res.status(404).json({ error: "File not found" });
+
+        const filePath = path.join(process.env.UPLOAD_DIR, 'avatars', user);
+        if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found on disk" });
+
+        const ext = path.extname(fileDoc).toLowerCase();
+        const mimeTypes = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.webp': 'image/webp',
+            '.gif': 'image/gif'
+        };
+
+        const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+        res.setHeader("Content-Type", contentType);
+        res.sendFile(`${fileDoc}`, { root: filePath })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 export default router;

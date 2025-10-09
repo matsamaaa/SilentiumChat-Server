@@ -110,6 +110,15 @@ class UserManager {
             throw new Error("Database error");
         }
     }
+
+    static async getAvatar(userId) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            return user ? user.avatar : null;
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
 }
 
 export default UserManager;
