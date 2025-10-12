@@ -12,6 +12,7 @@ import userRoutes from './routes/user.js';
 import messageRoute from './routes/message.js';
 import filesRoute from './routes/files.js';
 import meRoute from './routes/me.js';
+import friendsRoute from './routes/friends.js';
 
 // managers
 import connectToDatabase from "./database/connect.js";
@@ -44,7 +45,8 @@ const io = new Server(server, {
     app.use('/user', userRoutes);
     app.use('/message', messageRoute);
     app.use('/files', filesRoute);
-    app.use('/me', meRoute)
+    app.use('/me', meRoute);
+    app.use('/friends', friendsRoute);
 
     // websocket
     const onlineSessions = new Map();
