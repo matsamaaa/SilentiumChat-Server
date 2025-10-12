@@ -29,7 +29,7 @@ class FriendManager {
 
             if (!friends) return null;
 
-            return friends.status;
+            return friends;
         } catch (error) {
             throw new Error("Database error");
         }
@@ -46,6 +46,10 @@ class FriendManager {
 
             if (friendship) {
                 if (friendship.status === 'rejected') {
+                    if (friendship.userId === to) {
+                        friendship.userId = from;
+                        friendship.friendId = to;
+                    }
                     friendship.status = 'pending';
                     await friendship.save();
                     return { message: "Friend request re-sent" };
@@ -62,6 +66,50 @@ class FriendManager {
             return { message: "Friend request sent" };
         } catch (error) {
             Log.Error("Error sending friend request:", error);
+            throw new Error("Database error");
+        }
+    }
+
+    static async acceptFriendRequest(userId, friendId) {
+        try {
+            const friendship = await Friend.findOne({
+                users: {
+                    $all: [userId, friendId],
+                    $size: 2
+                },
+                status: 'pending'
+            });
+            if (!friendship) {
+                throw new Error("No pending friend request found");
+            }
+
+            friendship.status = 'accepted';
+            await friendship.save();
+            return { message: "Friend request accepted" };
+        } catch (error) {
+            Log.Error("Error accepting friend request:", error);
+            throw new Error("Database error");
+        }
+    }
+
+    static async refuseFriendRequest(userId, friendId) {
+        try {
+            const friendship = await Friend.findOne({
+                users: {
+                    $all: [userId, friendId],
+                    $size: 2
+                },
+                status: 'pending'
+            });
+            if (!friendship) {
+                throw new Error("No pending friend request found");
+            }
+
+            friendship.status = 'rejected';
+            await friendship.save();
+            return { message: "Friend request refused" };
+        } catch (error) {
+            Log.Error("Error refusing friend request:", error);
             throw new Error("Database error");
         }
     }
