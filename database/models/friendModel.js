@@ -5,6 +5,7 @@ const friendSchema = new mongoose.Schema({
     friendId: { type: String, required: true },
     users: [String], // Array of two user IDs
     status: { type: String, enum: ['pending', 'accepted', 'rejected', 'blocked'], default: 'pending' },
+    isBlocked: [String],
     createdAt: { type: Date, default: Date.now }
 });
 

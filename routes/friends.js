@@ -57,4 +57,29 @@ router.post('/:friendId/refuse', validateToken, async (req, res) => {
     }
 });
 
+router.post('/:friendId/block', validateToken, async (req, res) => {
+    const { friendId } = req.params;
+    const userId = req.user;
+    try {
+        const result = await FriendManager.blockUser(userId, friendId);
+        res.json({ message: result.message });
+    } catch (error) {
+        Log.Error("Error blocking user:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.post('/:friendId/unblock', validateToken, async (req, res) => {
+    const { friendId } = req.params;
+    const userId = req.user;
+
+    try {
+        const result = await FriendManager.unblockUser(userId, friendId);
+        res.json({ message: result.message });
+    } catch (error) {
+        Log.Error("Error unblocking user:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 export default router;

@@ -114,6 +114,61 @@ class FriendManager {
         }
     }
 
+    static async blockUser(userId, friendId) {
+        try {
+            let friendship = await Friend.findOne({
+                users: {
+                    $all: [userId, friendId],
+                    $size: 2
+                }
+            });
+            if (friendship) {
+                if (friendship.isBlocked.includes(friendId)) {
+                    return { message: "User is already blocked" };
+                }
+                friendship.status = 'blocked';
+                friendship.isBlocked.push(friendId);
+
+                await friendship.save();
+                return { message: "User blocked successfully" };
+            }
+
+            friendship = await this.addFriend(userId, friendId);
+            friendship.status = 'blocked';
+            friendship.isBlocked.push(friendId);
+            await friendship.save();
+            return { message: "User blocked successfully" };
+        } catch (error) {
+            Log.Error("Error blocking user:", error);
+            throw new Error("Database error");
+        }
+    }
+
+    static async unblockUser(userId, friendId) {
+        try {
+            const friendship = await Friend.findOne({
+                users: {
+                    $all: [userId, friendId],
+                    $size: 2
+                },
+                status: 'blocked'
+            });
+            if (!friendship) {
+                throw new Error("No blocked user found");
+            }
+
+            friendship.isBlocked = friendship.isBlocked.filter(id => id !== friendId);
+            if (friendship.isBlocked.length < 1) {
+                friendship.status = 'rejected';
+            }
+            await friendship.save();
+            return { message: "User unblocked successfully" };
+        } catch (error) {
+            Log.Error("Error unblocking user:", error);
+            throw new Error("Database error");
+        }
+    }
+
 }
 
 export default FriendManager;
