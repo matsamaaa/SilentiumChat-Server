@@ -20,6 +20,7 @@ import UserManager from "./database/managers/userManager.js";
 import AuthManager from "./database/managers/authManager.js";
 import PrivateDiscussionManager from "./database/managers/privateDiscussionManager.js";
 import MessageManager from "./database/managers/messageManager.js";
+import FriendManager from "./database/managers/friendManager.js";
 
 dotenv.config();
 
@@ -81,6 +82,12 @@ const io = new Server(server, {
             const auth = await AuthManager.isValidAuth(from, socket.userToken);
             if (!auth) {
                 Log.Error("Unauthorized: invalid userId or userToken");
+                return;
+            }
+
+            const friendsStatus = await FriendManager.getFriendsStatus(from, to);
+            if(!friendsStatus || friendsStatus.status == 'blocked') {
+                Log.Error("Cannot send message to this user: blocked");
                 return;
             }
 

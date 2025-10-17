@@ -82,4 +82,17 @@ router.post('/:friendId/unblock', validateToken, async (req, res) => {
     }
 });
 
+router.post('/:friendId/cancel', validateToken, async (req, res) => {
+    const { friendId } = req.params;
+    const userId = req.user;
+
+    try {
+        const result = await FriendManager.cancelFriendRequest(userId, friendId);
+        res.json({ message: result.message });
+    } catch (error) {
+        Log.Error("Error cancelling friend request:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 export default router;

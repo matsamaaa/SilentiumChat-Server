@@ -169,6 +169,28 @@ class FriendManager {
         }
     }
 
+    static async cancelFriendRequest(userId, friendId) {
+        try {
+            const friendship = await Friend.findOne({
+                users: {
+                    $all: [userId, friendId],
+                    $size: 2
+                },
+                status: 'pending'
+            });
+            if (!friendship) {
+                throw new Error("No pending friend request found");
+            }
+
+            friendship.status = 'rejected';
+            await friendship.save();
+            return { message: "Friend request cancelled" };
+        } catch (error) {
+            Log.Error("Error cancelling friend request:", error);
+            throw new Error("Database error");
+        }
+    }
+
 }
 
 export default FriendManager;
