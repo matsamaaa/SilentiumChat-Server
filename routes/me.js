@@ -95,6 +95,27 @@ router.patch('/password/update', validateToken, async (req, res) => {
     }
 });
 
+router.post('/password/validate', validateToken, async (req, res) => {
+    const { password } = req.body;
+
+    try {
+        const user = await UserManager.getUserById(req.user);
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: "User not found" });
+        }
+
+        if (!await bcrypt.compare(password, user.password)) {
+            return res.status(400).json({ success: false, message: "Invalid password" });
+        }
+        
+        res.json({ success: true });
+    } catch (error) {
+        Log.Error("Error validating password:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 router.post('/avatar', validateToken, upload.single('avatar'), async (req, res) => {
     const file = req.file;
     const id = req.user;
