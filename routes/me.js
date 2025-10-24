@@ -2,6 +2,8 @@ import express from 'express';
 import UserManager from '../database/managers/userManager.js';
 import Log from '../utils/logs/logs.js';
 import { validateToken } from '../middleware/auth.js';
+import PasswordValidator from '../utils/validations/password.js';
+import bcrypt from 'bcrypt';
 import multer from 'multer';
 import path from 'path';
 import Ids from '../utils/generate/ids.js';
@@ -10,35 +12,35 @@ import fs from 'fs';
 const router = express.Router();
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const userDir = path.join(process.env.UPLOAD_DIR, 'avatars', req.user);
+    destination: (req, file, cb) => {
+        const userDir = path.join(process.env.UPLOAD_DIR, 'avatars', req.user);
 
-    // Crée le dossier s’il n’existe pas
-    fs.mkdir(userDir, { recursive: true }, (err) => {
-      if (err) {
-        return cb(err);
-      }
-      cb(null, userDir);
-    });
-  },
+        // Crée le dossier s’il n’existe pas
+        fs.mkdir(userDir, { recursive: true }, (err) => {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, userDir);
+        });
+    },
 
-  filename: (req, file, cb) => {
-    const id = Ids.generateAvatarId();
-    const ext = path.extname(file.originalname);
-    cb(null, id + ext);
-  }
+    filename: (req, file, cb) => {
+        const id = Ids.generateAvatarId();
+        const ext = path.extname(file.originalname);
+        cb(null, id + ext);
+    }
 });
 
 const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!allowed.includes(file.mimetype)) {
-      return cb(new Error('Only JPEG, PNG, or WEBP files are allowed'));
-    }
-    cb(null, true);
-  },
-  limits: { fileSize: 10 * 1024 * 1024 } // max 10 Mo
+    storage,
+    fileFilter: (req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowed.includes(file.mimetype)) {
+            return cb(new Error('Only JPEG, PNG, or WEBP files are allowed'));
+        }
+        cb(null, true);
+    },
+    limits: { fileSize: 10 * 1024 * 1024 } // max 10 Mo
 });
 
 router.patch('/username', validateToken, async (req, res) => {
@@ -59,6 +61,36 @@ router.patch('/tag', validateToken, async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         Log.Error("Error updating tag:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.patch('/password/update', validateToken, async (req, res) => {
+    const { newPassword, passwordConfirmation, currentPassword } = req.body;
+
+    try {
+        const user = await UserManager.getUserById(req.user);
+        if (!user) {
+            return res.status(400).json({ success: false, message: "User not found" });
+        }
+
+        // compare hashed password and password
+        if (!await bcrypt.compare(currentPassword, user.password)) {
+            return res.status(400).json({ success: false, message: "Invalid password" });
+        }
+
+        if (!PasswordValidator.isValidPassword(newPassword)) {
+            return res.status(400).json({ success: false, message: "Invalid password format" });
+        }
+
+        if (!PasswordValidator.isSamePassword(newPassword, passwordConfirmation)) {
+            return res.status(400).json({ success: false, message: "Passwords do not match" });
+        }
+
+        await UserManager.updatePassword(req.user, newPassword);
+        res.json({ success: true });
+    } catch (error) {
+        Log.Error("Error updating password:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });

@@ -25,6 +25,22 @@ class UserManager {
         }
     }
 
+    static async updatePassword(userId, newPassword) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            user.password = hashedPassword;
+            await user.save();
+            return user;
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
+
     static async getUsersSize() {
         try {
             return await User.countDocuments();
@@ -36,6 +52,15 @@ class UserManager {
     static async getUserByEmail(email) {
         try {
             const user = await User.findOne({ email });
+            return user;
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
+
+    static async getUserById(userId) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
             return user;
         } catch (error) {
             throw new Error("Database error");
