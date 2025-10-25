@@ -86,7 +86,7 @@ const io = new Server(server, {
             }
 
             const friendsStatus = await FriendManager.getFriendsStatus(from, to);
-            if(!friendsStatus || friendsStatus.status == 'blocked') {
+            if(friendsStatus && friendsStatus.status == 'blocked') {
                 Log.Error("Cannot send message to this user: blocked");
                 return;
             }
