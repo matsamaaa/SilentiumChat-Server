@@ -11,13 +11,26 @@ router.get('/:userId/messages', validateToken, async (req, res) => {
     try {
         const discussion = await PrivateDiscussionManager.getDiscussion(from, userId);
         if(!discussion) {
-            return res.status(200).json({ users: [from, userId], encryptedMessages: [] });
+            return res.status(200).json(
+                { 
+                    success: true, 
+                    message: "No messages found", 
+                    datas: {
+                        users: [from, userId],
+                        encryptedMessages: []
+                    }
+                }
+            );
         }   
 
-        return res.status(200).json(discussion);
+        return res.status(200).json({
+            success: true,
+            message: "Messages fetched successfully",
+            datas: discussion
+        });
     } catch (error) {
         Log.Error("Error fetching messages:", error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ success: false, message: "Error fetching messages" });
     }
 });
 
@@ -26,10 +39,14 @@ router.get('/lastmessages', validateToken, async (req, res) => {
 
     try {
         const lastMessages = await PrivateDiscussionManager.getLastMessages(userId);
-        return res.status(200).json(lastMessages);
+        return res.status(200).json({
+            success: true,
+            message: "Last messages fetched successfully",
+            datas: lastMessages
+        });
     } catch (error) {
         Log.Error("Error fetching last messages:", error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ success: false, message: "Error fetching last messages" });
     }
 });
 
@@ -37,15 +54,19 @@ router.patch('/:userId/status', validateToken, async (req, res) => {
     const { userId } = req.params;
     const from = req.user;
     if (!['accepted', 'refused'].includes(req.body.status)) {
-        return res.status(400).json({ error: "Invalid status value" });
+        return res.status(400).json({ success: false, message: "Invalid status value" });
     }
 
     try {
         const updatedDiscussion = await PrivateDiscussionManager.updateDiscussionStatus(from, userId, req.body.status);
-        return res.status(200).json(updatedDiscussion);
+        return res.status(200).json({
+            success: true,
+            message: "Discussion status updated successfully",
+            datas: updatedDiscussion
+        });
     } catch (error) {
         Log.Error("Error updating discussion status:", error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ success: false, message: "Error updating discussion status" });
     }
 });
 
