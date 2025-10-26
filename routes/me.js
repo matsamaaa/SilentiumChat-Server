@@ -47,10 +47,10 @@ router.patch('/username', validateToken, async (req, res) => {
     const { username } = req.body;
     try {
         await UserManager.updateUsername(req.user, username);
-        res.json({ success: true });
+        res.json({ success: true, message: "Username updated successfully" });
     } catch (error) {
         Log.Error("Error updating username:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ success: false, message: "Error updating username" });
     }
 });
 
@@ -58,10 +58,10 @@ router.patch('/tag', validateToken, async (req, res) => {
     const { tag } = req.body;
     try {
         await UserManager.updateTag(req.user, tag);
-        res.json({ success: true });
+        res.json({ success: true, message: "Tag updated successfully" });
     } catch (error) {
         Log.Error("Error updating tag:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ success: false, message: "Error updating tag" });
     }
 });
 
@@ -88,10 +88,10 @@ router.patch('/password/update', validateToken, async (req, res) => {
         }
 
         await UserManager.updatePassword(req.user, newPassword);
-        res.json({ success: true });
+        res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
         Log.Error("Error updating password:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ success: false, message: "Error updating password" });
     }
 });
 
@@ -109,10 +109,10 @@ router.post('/password/validate', validateToken, async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid password" });
         }
         
-        res.json({ success: true });
+        res.json({ success: true, message: "Password is valid" });
     } catch (error) {
         Log.Error("Error validating password:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ success: false, message: "Error validating password" });
     }
 });
 
@@ -121,15 +121,15 @@ router.post('/avatar', validateToken, upload.single('avatar'), async (req, res) 
     const id = req.user;
 
     if (!file) {
-        return res.status(400).json({ error: "No file uploaded" });
+        return res.status(400).json({ success: false, message: "No file uploaded" });
     }
 
     try {
         await UserManager.uploadAvatar(id, file.filename);
-        res.json({ success: true });
+        res.json({ success: true, message: "Avatar uploaded successfully" });
     } catch (error) {
         Log.Error("Error updating avatar:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ success: false, message: "Error updating avatar" });
     }
 });
 
@@ -138,10 +138,10 @@ router.get('/avatar', validateToken, async (req, res) => {
     try {
         const fileDoc = await UserManager.getAvatar(user);
 
-        if (!fileDoc) return res.status(204).json({ error: "No avatar uploaded" });
+        if (!fileDoc) return res.status(204).json({ success: false, message: "No avatar set" });
 
         const filePath = path.join(process.env.UPLOAD_DIR, 'avatars', user);
-        if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found on disk" });
+        if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: "File not found on server" });
 
         const ext = path.extname(fileDoc).toLowerCase();
         const mimeTypes = {
@@ -158,7 +158,7 @@ router.get('/avatar', validateToken, async (req, res) => {
         res.sendFile(`${fileDoc}`, { root: filePath })
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ success: false, message: "Error retrieving avatar" });
     }
 });
 
@@ -169,7 +169,7 @@ router.delete('/avatar', validateToken, async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         console.error("Error deleting avatar:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ success: false, message: "Error deleting avatar" });
     }
 })
 
