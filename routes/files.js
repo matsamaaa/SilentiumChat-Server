@@ -34,7 +34,7 @@ router.post('/upload', validateToken, createMongoFile, upload.single('file'), as
     const file = req.file;
 
     if (!file) {
-        return res.status(400).json({ error: "No file uploaded" });
+        return res.status(400).json({ success: false, message: "No file uploaded" });
     }
 
     const contentType = file.mimetype || 'application/octet-stream';
@@ -53,7 +53,10 @@ router.post('/upload', validateToken, createMongoFile, upload.single('file'), as
     // return response
     return res.json({
         success: true,
-        fileId: updatedFile._id
+        message: "File uploaded successfully",
+        datas: {
+            fileId: updatedFile._id
+        }
     });
 });
 
@@ -63,10 +66,10 @@ router.get('/:id', async (req, res) => {
     try {
         const fileDoc = await FileManager.getFileById(id);
 
-        if (!fileDoc) return res.status(404).json({ error: "File not found" });
+        if (!fileDoc) return res.status(404).json({ success: false, message: "File not found" });
 
         const filePath = path.join(process.env.UPLOAD_DIR, fileDoc._id.toString());
-        if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found on disk" });
+        if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: "File not found on server" });
 
         res.setHeader("Content-Type", fileDoc.contentType || "application/octet-stream");
         res.setHeader("Content-Disposition", `attachment; filename="${fileDoc._id.toString()}"`);
@@ -74,7 +77,7 @@ router.get('/:id', async (req, res) => {
         fs.createReadStream(filePath).pipe(res);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ success: false, message: "Error downloading file" });
     }
 });
 
@@ -84,12 +87,19 @@ router.get('/:id/meta', async (req, res) => {
     try {
         const fileDoc = await FileManager.getFileById(id);
 
-        if (!fileDoc) return res.status(404).json({ error: "File not found" });
+        if (!fileDoc) return res.status(404).json({ success: false, message: "File not found" });
 
-        res.json({ ...fileDoc.metadata, name: fileDoc.filename });
+        res.json({ 
+            success: true, 
+            message: "File metadata fetched successfully",
+            datas: {
+                ...fileDoc.metadata,
+                name: fileDoc.filename
+            }
+        });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ success: false, message: "Error fetching file metadata" });
     }
 });
 
