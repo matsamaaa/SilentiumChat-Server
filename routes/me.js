@@ -166,7 +166,7 @@ router.delete('/avatar', validateToken, async (req, res) => {
     const user = req.user;
     try {
         await UserManager.deleteAvatar(user);
-        res.json({ success: true });
+        res.json({ success: true, message: "Avatar deleted successfully" });
     } catch (error) {
         console.error("Error deleting avatar:", error);
         res.status(500).json({ success: false, message: "Error deleting avatar" });

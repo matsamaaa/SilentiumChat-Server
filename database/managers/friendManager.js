@@ -124,7 +124,7 @@ class FriendManager {
             });
             if (friendship) {
                 if (friendship.isBlocked.includes(friendId)) {
-                    return { message: "User is already blocked" };
+                    throw new Error("User is already blocked");
                 }
                 friendship.status = 'blocked';
                 friendship.isBlocked.push(friendId);
@@ -140,7 +140,7 @@ class FriendManager {
             return { message: "User blocked successfully" };
         } catch (error) {
             Log.Error("Error blocking user:", error);
-            throw new Error("Database error");
+            throw new Error("Error blocking user");
         }
     }
 
