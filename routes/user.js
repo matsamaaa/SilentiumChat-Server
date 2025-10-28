@@ -78,7 +78,7 @@ router.get('/:userId/avatar', validateToken, async (req, res) => {
             res.setHeader("Content-Type", contentType);
             res.sendFile(`${fileDoc}`, { root: filePath })
         } else {
-            return res.status(403).json({ success: false, message: "You are not friends with this user" });
+            return res.status(204).json({ success: false, message: "You are not friends with this user" });
         }
     } catch (error) {
         Log.Error("Error fetching user avatar:", error);
