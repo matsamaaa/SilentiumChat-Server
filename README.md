@@ -27,7 +27,7 @@ Before running the server, make sure to configure the following:
 
 > Example (in a `.env` file):
 ```env
-URL_MONGO_INTERNAL="URL_HERE (ex: mongodb://USERNAME:PASSWORD@DOMAIN_NAME/?authMechanism=DEFAULT&authSource=admin&dbName=DATABASE_NAME)"
+URL_MONGO="URL_HERE (ex: mongodb://USERNAME:PASSWORD@DOMAIN_NAME/?authMechanism=DEFAULT&authSource=admin&dbName=DATABASE_NAME)"
 PORT=30001
 UPLOAD_DIR="src"
 ```
