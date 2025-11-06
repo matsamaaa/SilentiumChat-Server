@@ -38,6 +38,19 @@ router.post('/:friendId/request', validateToken, async (req, res) => {
     }
 });
 
+router.post('/:friendId/remove', validateToken, async (req, res) => {
+    const { friendId } = req.params;
+    const userId = req.user;
+
+    try {
+        await FriendManager.removeFriend(userId, friendId);
+        res.json({ success: true, message: "Friend removed successfully" });
+    } catch (error) {
+        Log.Error("Error removing friend:", error);
+        res.status(500).json({ success: false, message: "Friend removing error" });
+    }
+});
+
 router.post('/:friendId/accept', validateToken, async (req, res) => {
     const { friendId } = req.params;
     const userId = req.user;
@@ -99,6 +112,23 @@ router.post('/:friendId/cancel', validateToken, async (req, res) => {
     } catch (error) {
         Log.Error("Error cancelling friend request:", error);
         res.status(500).json({ success: false, message: "Friend request cancelling error" });
+    }
+});
+
+router.get('/list/:status', validateToken, async (req, res) => {
+    const userId = req.user;
+    const { status } = req.params;
+
+    try {
+        const friendsList = await FriendManager.getFriendsList(userId, status);
+        res.json({
+            success: true,
+            message: "Friend list fetched successfully",
+            datas: friendsList
+        });
+    } catch (error) {
+        Log.Error("Error fetching friend list:", error);
+        res.status(500).json({ success: false, message: "Friend list fetching error" });
     }
 });
 

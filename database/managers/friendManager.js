@@ -191,6 +191,46 @@ class FriendManager {
         }
     }
 
+    static async getFriendsList(userId, status) {
+        try {
+            const friendsList = await Friend.find({
+                users: {
+                    $in: [userId]
+                },
+                status: status
+            });
+
+            return friendsList;
+        } catch (error) {
+            Log.Error("Error retrieving friend list:", error);
+            throw new Error("Database error");
+        }
+    }
+
+    static async removeFriend(userId, friendId) {
+        try {
+            const friendship = await Friend.findOne({
+                users: {
+                    $all: [userId, friendId],
+                    $size: 2
+                },
+                status: 'accepted'
+            });
+
+            if (!friendship) {
+                throw new Error("No friendship found to remove");
+            }
+
+            friendship.status = 'rejected';
+            await friendship.save();
+
+            return { message: "Friend removed successfully" };
+        } catch (error) {
+            Log.Error("Error removing friend:", error);
+            throw new Error("Database error");
+        }
+    }
+
 }
 
 export default FriendManager;
