@@ -210,11 +210,18 @@ class FriendManager {
                     const targetId = friendship.users.find(id => id !== userId);
                     const username = await UserManager.getUsername(targetId);
 
-                    return {
+                    const object = {
                         userId: targetId,
                         createdAt: friendship.createdAt,
                         username
                     };
+
+                    if (status === 'pending') {
+                        const hasAsk = friendship.userId === targetId ? false : true;
+                        object.hasAsk = hasAsk;
+                    }
+
+                    return object;
                 })
             );
             
