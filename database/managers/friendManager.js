@@ -1,5 +1,6 @@
 import Log from '../../utils/logs/logs.js';
 import Friend from '../models/friendModel.js';
+import UserManager from './userManager.js';
 
 class FriendManager {
 
@@ -200,7 +201,24 @@ class FriendManager {
                 status: status
             });
 
-            return friendsList;
+            if (!friendsList) {
+                throw new Error("No friends found");
+            }
+
+            const filteredFriendsList = await Promise.all(
+                friendsList.map(async friendship => {
+                    const targetId = friendship.users.find(id => id !== userId);
+                    const username = await UserManager.getUsername(targetId);
+
+                    return {
+                        userId: targetId,
+                        createdAt: friendship.createdAt,
+                        username
+                    };
+                })
+            );
+            
+            return filteredFriendsList;
         } catch (error) {
             Log.Error("Error retrieving friend list:", error);
             throw new Error("Database error");
