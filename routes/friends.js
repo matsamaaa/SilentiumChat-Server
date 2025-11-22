@@ -85,7 +85,7 @@ router.post('/:friendId/block', validateToken, async (req, res) => {
         res.json({ success: true, message: "User blocked successfully" });
     } catch (error) {
         Log.Error("Error blocking user:", error);
-        res.status(500).json({ success: false, message: error || "Error blocking user" });
+        res.status(500).json({ success: false, message: "Error blocking user" });
     }
 });
 
