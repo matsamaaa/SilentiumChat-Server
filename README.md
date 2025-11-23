@@ -29,7 +29,20 @@ Before running the server, make sure to configure the following:
 ```env
 URL_MONGO="URL_HERE (ex: mongodb://USERNAME:PASSWORD@DOMAIN_NAME/?authMechanism=DEFAULT&authSource=admin&dbName=DATABASE_NAME)"
 PORT=30001
+
+// Mailtrap SMTP configuration for testing emails
+MAIL_HOST="smtp.exemple.com"
+MAIL_PORT=587
+MAIL_SECURE="false"
+MAIL_USER="admin@example.com"
+MAIL_PASS="example password"
+
+// DIRECTORY CONFIGURATION
 UPLOAD_DIR="src"
+MAIL_TEMPLATES_DIR="templates/mails"
+
+// URLS
+FRONTEND_URL="http://localhost:3000"
 ```
 
 ## Contributing
