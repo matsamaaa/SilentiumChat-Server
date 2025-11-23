@@ -16,14 +16,10 @@ import messageRoute from './routes/message.js';
 import filesRoute from './routes/files.js';
 import meRoute from './routes/me.js';
 import friendsRoute from './routes/friends.js';
+import mailRoute from './routes/mail.js';
 
 // managers
 import connectToDatabase from "./database/connect.js";
-import UserManager from "./database/managers/userManager.js";
-import AuthManager from "./database/managers/authManager.js";
-import PrivateDiscussionManager from "./database/managers/privateDiscussionManager.js";
-import MessageManager from "./database/managers/messageManager.js";
-import FriendManager from "./database/managers/friendManager.js";
 
 dotenv.config();
 
@@ -46,6 +42,7 @@ app.use(cors({
     app.use('/files', filesRoute);
     app.use('/me', meRoute);
     app.use('/friends', friendsRoute);
+    app.use('/mail', mailRoute);
 
     // websocket
     const server = http.createServer(app);

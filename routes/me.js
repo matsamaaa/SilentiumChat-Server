@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
     },
 
     filename: (req, file, cb) => {
-        const id = Ids.generateAvatarId();
+        const id = Ids.generateLongId();
         const ext = path.extname(file.originalname);
         cb(null, id + ext);
     }

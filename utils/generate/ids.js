@@ -5,7 +5,7 @@ class Ids {
         return String(id).padStart(20, "0");
     }
 
-    static generateAvatarId() {
+    static generateLongId() {
         const caracters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         const caractersList = caracters.split('');
         let id = '';
