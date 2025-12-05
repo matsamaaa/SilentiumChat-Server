@@ -16,6 +16,11 @@ class ResetManager {
         const resetEntry = await resetModel.findOne({ userId: userId });
         return resetEntry ?? null;
     }
+
+    static async getResetToken(userId, token) {
+        const resetEntry = await resetModel.findOne({ userId: userId, resetToken: token });
+        return resetEntry ?? null;
+    }
 }
 
 export default ResetManager;

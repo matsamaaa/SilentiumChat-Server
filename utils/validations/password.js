@@ -4,7 +4,8 @@ class PasswordValidator {
     }
 
     static isSamePassword(password1, password2) {
-        return password1 === password2;
+        if (!password1 || !password2) return false;
+        return String(password1).toLowerCase() === String(password2).toLowerCase();
     }
 }
 
