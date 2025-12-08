@@ -16,9 +16,10 @@ const constructMail = async (category, subject, variables) => {
     const mailConstructor = getConstructor(category);
     const templatePath = path.join(process.env.MAIL_TEMPLATES_DIR, category, `${subject}.hbs`);
 
-    const html = await mailConstructor.render(templatePath, { 
+    const html = await mailConstructor.renderView(templatePath, { 
         ...variables, 
         subject,
+        sendAt: new Date().toLocaleString(),
         currentYear: new Date().getFullYear(),
     });
     return html;
