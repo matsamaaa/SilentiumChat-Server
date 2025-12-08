@@ -17,6 +17,7 @@ import filesRoute from './routes/files.js';
 import meRoute from './routes/me.js';
 import friendsRoute from './routes/friends.js';
 import mailRoute from './routes/mail.js';
+import verificationRoute from './routes/verification.js';
 
 // managers
 import connectToDatabase from "./database/connect.js";
@@ -43,6 +44,7 @@ app.use(cors({
     app.use('/me', meRoute);
     app.use('/friends', friendsRoute);
     app.use('/mail', mailRoute);
+    app.use('/verification', verificationRoute);
 
     // websocket
     const server = http.createServer(app);

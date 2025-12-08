@@ -22,6 +22,10 @@ class MailchangeManager {
         const changeEntry = await Mailchange.findOne({ userId: userId, mailchangeToken: token });
         return changeEntry ?? null;
     }
+
+    static async deleteChangeToken(userId, token) {
+        await Mailchange.deleteOne({ userId: userId, mailchangeToken: token });
+    }
 }
 
 export default MailchangeManager;

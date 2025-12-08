@@ -122,6 +122,21 @@ class UserManager {
         }
     }
 
+    static async updateEmail(userId, newEmail) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            user.email = newEmail;
+            await user.save();
+            return user;
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
+
     static async uploadAvatar(userId, fileName) {
         try {
             const user = await User.findOne({ uniqueId: userId });
