@@ -52,6 +52,34 @@ router.get('/:userId/username', validateToken, async (req, res) => {
     }
 });
 
+router.get('/:userId/tag', validateToken, async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const tag = await UserManager.getUserTag(userId);
+        res.json({
+            success: true, 
+            message: "Tag fetched successfully", 
+            datas: { tag }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error fetching tag" });
+    }
+});
+
+router.get('/:userId/creationdate', validateToken, async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const creationDate = await UserManager.getUserCreationDate(userId);
+        res.json({
+            success: true, 
+            message: "Creation date fetched successfully", 
+            datas: { creationDate }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error fetching creation date" });
+    }
+});
+
 router.get('/:userId/avatar', validateToken, async (req, res) => {
     const { userId } = req.params;
     const user = req.user;

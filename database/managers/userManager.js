@@ -94,6 +94,24 @@ class UserManager {
         }
     }
 
+    static async getUserTag(userId) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            return user ? user.tag : null;
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
+
+    static async getUserCreationDate(userId) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            return user ? user.createdAt : null;
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
+
     static async updateUsername(userId, newUsername) {
         try {
             const user = await User.findOne({ uniqueId: userId });
