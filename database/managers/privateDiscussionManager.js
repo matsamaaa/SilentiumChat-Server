@@ -22,13 +22,22 @@ class PrivateDiscussionManager {
      * @returns {PrivateDiscussion}
      */
 
-    static async getDiscussion(from, to) {
-        return await PrivateDiscussion.findOne({ 
+    static async getDiscussion(from, to, page = 1) {
+        const pageSize = 15;
+        const discussion = await PrivateDiscussion.findOne({ 
             users: { 
                 $all: [from, to],
                 $size: 2
             } 
         });
+
+        discussion.encryptedMessages = discussion 
+            ? discussion.encryptedMessages.reverse().slice((page - 1) * pageSize, page * pageSize) 
+            : [];
+
+
+        console.log("Fetched discussion:", discussion.encryptedMessages.length, "messages on page", page);
+        return discussion;
     }
 
     static async getLastMessages(userId) {

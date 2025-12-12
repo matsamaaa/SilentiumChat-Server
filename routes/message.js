@@ -2,14 +2,18 @@ import express from 'express';
 import PrivateDiscussionManager from '../database/managers/privateDiscussionManager.js';
 import { validateToken } from '../middleware/auth.js';
 import Log from '../utils/logs/logs.js';
+import UserManager from '../database/managers/userManager.js';
 
 const router = express.Router();
 
 router.get('/:userId/messages', validateToken, async (req, res) => {
     const { userId } = req.params; // recipient user
+    const { page = 1 } = req.query;
     const from = req.user;
     try {
-        const discussion = await PrivateDiscussionManager.getDiscussion(from, userId);
+        const username = await UserManager.getUsername(userId);
+
+        const discussion = await PrivateDiscussionManager.getDiscussion(from, userId, page);
         if(!discussion) {
             return res.status(200).json(
                 { 
@@ -17,7 +21,8 @@ router.get('/:userId/messages', validateToken, async (req, res) => {
                     message: "No messages found", 
                     datas: {
                         users: [from, userId],
-                        encryptedMessages: []
+                        encryptedMessages: [],
+                        username: username
                     }
                 }
             );
