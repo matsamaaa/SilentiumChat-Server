@@ -43,7 +43,17 @@ router.get('/lastmessages', validateToken, async (req, res) => {
     const userId = req.headers['x-user-id'];
 
     try {
-        const lastMessages = await PrivateDiscussionManager.getLastMessages(userId);
+        let lastMessages = await PrivateDiscussionManager.getLastMessages(userId);
+
+        lastMessages = await Promise.all(lastMessages.map(async discussion => {
+            const otherUserId = discussion.users.find(id => id !== userId);
+            const username = await UserManager.getUsername(otherUserId);
+            return {
+                ...discussion,
+                username: username
+            };
+        }));
+
         return res.status(200).json({
             success: true,
             message: "Last messages fetched successfully",

@@ -35,8 +35,6 @@ class PrivateDiscussionManager {
             ? discussion.encryptedMessages.reverse().slice((page - 1) * pageSize, page * pageSize) 
             : [];
 
-
-        console.log("Fetched discussion:", discussion.encryptedMessages.length, "messages on page", page);
         return discussion;
     }
 
