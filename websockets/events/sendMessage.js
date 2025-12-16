@@ -41,9 +41,13 @@ export default function sendMessageHandler(socket) {
         const finalMessage = message.getMessage();
 
         let discussion = await PrivateDiscussionManager.getDiscussion(from, to);
-        discussion = discussion || await PrivateDiscussionManager.createDiscussion(from, to);
+        let isFirstMessage = false;
+        if(!discussion) {
+            discussion = await PrivateDiscussionManager.createDiscussion(from, to);
+            isFirstMessage = true;
+        }
 
-        await PrivateDiscussionManager.addMessage(discussion._id, finalMessage);
+        await PrivateDiscussionManager.addMessage(discussion._id, finalMessage, isFirstMessage);
         
         // send to the recipient
         const recipientSocketId = onlineSessions.get(to);

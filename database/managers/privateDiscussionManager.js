@@ -31,6 +31,8 @@ class PrivateDiscussionManager {
             } 
         });
 
+        if (!discussion) return null;
+
         discussion.encryptedMessages = discussion 
             ? discussion.encryptedMessages.reverse().slice((page - 1) * pageSize, page * pageSize) 
             : [];
@@ -54,9 +56,13 @@ class PrivateDiscussionManager {
         });
     }
 
-    static async addMessage(discussionId, message) {
+    static async addMessage(discussionId, message, isFirstMessage) {
         const discussion = await PrivateDiscussion.findById(discussionId);
         if (!discussion) throw new Error("Discussion not found");
+
+        if (isFirstMessage) {
+            message.isFirstMessage = isFirstMessage;
+        }
 
         discussion.encryptedMessages.push(message);
         await discussion.save();

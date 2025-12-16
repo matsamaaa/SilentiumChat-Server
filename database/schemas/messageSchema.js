@@ -9,6 +9,7 @@ const messageSchema = new mongoose.Schema({
 
     files: [{ type: mongoose.Schema.Types.ObjectId }],
 
+    isFirstMessage: { type: Boolean, default: false },
     isRead: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
     isPinned: { type: Boolean, default: false },
