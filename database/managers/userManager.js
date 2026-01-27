@@ -41,6 +41,22 @@ class UserManager {
         }
     }
 
+    static async updateFakePassword(userId, newFakePassword) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            const hashedFakePassword = await bcrypt.hash(newFakePassword, 10);
+            user.fakePassword = hashedFakePassword;
+            await user.save();
+            return user;
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
+
     static async getUsersSize() {
         try {
             return await User.countDocuments();

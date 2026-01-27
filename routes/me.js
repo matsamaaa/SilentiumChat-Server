@@ -116,6 +116,36 @@ router.post('/password/validate', validateToken, async (req, res) => {
     }
 });
 
+router.patch('/fakepassword/update', validateToken, async (req, res) => {
+    const { fakePassword, passwordConfirmation, currentPassword } = req.body;
+
+    try {
+        const user = await UserManager.getUserById(req.user);
+        if (!user) {
+            return res.status(400).json({ success: false, message: "User not found" });
+        }
+
+        // compare hashed password and password
+        if (!await bcrypt.compare(currentPassword, user.password)) {
+            return res.status(400).json({ success: false, message: "Invalid password" });
+        }
+
+        if (!PasswordValidator.isValidPassword(fakePassword)) {
+            return res.status(400).json({ success: false, message: "Invalid fake password format" });
+        }
+
+        if (!PasswordValidator.isSamePassword(fakePassword, passwordConfirmation)) {
+            return res.status(400).json({ success: false, message: "Fake passwords do not match" });
+        }
+
+        await UserManager.updateFakePassword(req.user, fakePassword);
+        res.json({ success: true, message: "Fake password updated successfully" });
+    } catch (error) {
+        Log.Error("Error updating fake password:", error);
+        res.status(500).json({ success: false, message: "Error updating fake password" });
+    }
+});
+
 router.post('/avatar', validateToken, upload.single('avatar'), async (req, res) => {
     const file = req.file;
     const id = req.user;
