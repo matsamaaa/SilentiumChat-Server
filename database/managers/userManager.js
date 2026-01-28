@@ -108,9 +108,10 @@ class UserManager {
                 throw new Error("User not found");
             }
 
-            user.publicKey = null;
+            user.publicKey = "reset";
             await user.save();
         } catch (error) {
+            console.error(error);
             throw new Error("Database error");
         }
     }

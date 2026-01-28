@@ -85,4 +85,19 @@ router.patch('/:userId/status', validateToken, async (req, res) => {
     }
 });
 
+router.delete('/discussions/delete', validateToken, async (req, res) => {
+    const userId = req.user;
+
+    try {
+        await PrivateDiscussionManager.deleteAllDiscussions(userId);
+        return res.status(200).json({
+            success: true,
+            message: "All discussions deleted successfully"
+        });
+    } catch (error) {
+        Log.Error("Error deleting all discussions:", error);
+        return res.status(500).json({ success: false, message: "Error deleting all discussions" });
+    }
+});
+
 export default router;

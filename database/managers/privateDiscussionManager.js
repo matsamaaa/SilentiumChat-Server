@@ -93,6 +93,14 @@ class PrivateDiscussionManager {
         return discussion;
     }
 
+    static async deleteAllDiscussions(userId) {
+        try {
+            const discussions = await PrivateDiscussion.deleteMany({ users: { $in: [userId] } });
+            return discussions;
+        } catch (error) {
+            throw new Error("Error deleting discussions");
+        }
+    }
 }
 
 export default PrivateDiscussionManager;
