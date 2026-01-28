@@ -5,6 +5,18 @@ import { validateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
+router.delete('/delete', validateToken, async (req, res) => {
+    const userId = req.user;
+    
+    try {
+        await FriendManager.cleanupFriendsList(userId);
+        res.json({ success: true, message: "Friends list cleaned up successfully" });
+    } catch (error) {
+        Log.Error("Error cleaning up friends list:", error);
+        res.status(500).json({ success: false, message: "Friends list cleanup error" });
+    }
+});
+
 router.get('/:friendId/status', validateToken, async (req, res) => {
     const { friendId } = req.params;
     const userId = req.user;

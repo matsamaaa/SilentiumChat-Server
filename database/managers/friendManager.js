@@ -256,6 +256,29 @@ class FriendManager {
         }
     }
 
+    /**
+     * Cleans up all friend relationships associated with a user.
+     * Removes all friend documents where the specified user ID exists in the users array.
+     * 
+     * @async
+     * @static
+     * @param {string} userId - The ID of the user whose friend relationships should be deleted
+     * @returns {Promise<void>}
+     * @throws {Error} Throws a "Database error" if the deletion operation fails
+     * 
+     * @example
+     * await Friend.cleanupFriendsList("user123");
+     */
+    
+    static async cleanupFriendsList(userId) {
+        try {
+            await Friend.deleteMany({ users: { $in: [userId] } });
+        } catch (error) {
+            Log.Error("Error cleaning up friends list:", error);
+            throw new Error("Database error");
+        }
+    }
+
 }
 
 export default FriendManager;
