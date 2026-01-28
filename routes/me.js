@@ -203,4 +203,16 @@ router.delete('/avatar', validateToken, async (req, res) => {
     }
 })
 
+router.delete('/publickey/delete', validateToken, async (req, res) => {
+    const userId = req.user;
+
+    try {
+        await UserManager.deletePublicKey(userId);
+        res.json({ success: true, message: "Public key deleted successfully" });
+    } catch (error) {
+        Log.Error("Error deleting public key:", error);
+        res.status(500).json({ success: false, message: "Error deleting public key" });
+    }
+});
+
 export default router;

@@ -101,6 +101,20 @@ class UserManager {
         }
     }
 
+    static async deletePublicKey(userId) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            user.publicKey = null;
+            await user.save();
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
+
     static async getUsername(userId) {
         try {
             const user = await User.findOne({ uniqueId: userId });
