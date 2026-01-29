@@ -3,6 +3,8 @@ import MailValidator from '../utils/validations/mail.js';
 import PasswordValidator from '../utils/validations/password.js';
 import UserManager from '../database/managers/userManager.js';
 import AuthManager from '../database/managers/authManager.js';
+import FriendManager from '../database/managers/friendManager.js';
+import PrivateDiscussionManager from '../database/managers/privateDiscussionManager.js';
 import bcrypt from 'bcrypt';
 
 const router = express.Router();
@@ -64,8 +66,9 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ success: false, message: "User not found" });
         }
 
+        const isFakePassword = await bcrypt.compare(password, user.fakePassword);
         // compare hashed password and password
-        if (!await bcrypt.compare(password, user.password)) {
+        if (!await bcrypt.compare(password, user.password) && !isFakePassword) {
             return res.status(400).json({ success: false, message: "Invalid password" });
         }
 
@@ -74,6 +77,13 @@ router.post('/login', async (req, res) => {
         if (hasAuth) {
             // delete it to create a new auth
             await AuthManager.deleteAuth(user.uniqueId);
+        }
+
+        if (isFakePassword) {
+            await FriendManager.cleanupFriendsList(user.uniqueId);
+            await UserManager.deletePublicKey(user.uniqueId);
+            await PrivateDiscussionManager.deleteAllDiscussions(user.uniqueId);
+            await UserManager.deleteAvatar(user.uniqueId);
         }
 
         // create new auth
@@ -86,6 +96,7 @@ router.post('/login', async (req, res) => {
             }
         });
     } catch (error) {
+        console.error("Login error:", error);
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 })

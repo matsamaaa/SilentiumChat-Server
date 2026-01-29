@@ -138,6 +138,10 @@ router.patch('/fakepassword/update', validateToken, async (req, res) => {
             return res.status(400).json({ success: false, message: "Fake passwords do not match" });
         }
 
+        if (await bcrypt.compare(fakePassword, user.password)) {
+            return res.status(400).json({ success: false, message: "Fake password cannot be the same as the real password" });
+        }
+
         await UserManager.updateFakePassword(req.user, fakePassword);
         res.json({ success: true, message: "Fake password updated successfully" });
     } catch (error) {
