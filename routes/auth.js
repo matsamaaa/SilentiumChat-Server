@@ -54,7 +54,7 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-
+    
     if (!MailValidator.validateEmail(email)) {
         return res.status(400).json({ success: false, message: "Invalid email format" });
     }
@@ -66,7 +66,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ success: false, message: "User not found" });
         }
 
-        const isFakePassword = await bcrypt.compare(password, user.fakePassword);
+        const isFakePassword = user.fakePassword ? await bcrypt.compare(password, user.fakePassword) : null;
         // compare hashed password and password
         if (!await bcrypt.compare(password, user.password) && !isFakePassword) {
             return res.status(400).json({ success: false, message: "Invalid password" });
