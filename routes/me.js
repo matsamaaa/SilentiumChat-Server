@@ -219,4 +219,17 @@ router.delete('/publickey/delete', validateToken, async (req, res) => {
     }
 });
 
+router.patch('/publickey/update', validateToken, async (req, res) => {
+    const userId = req.user;
+    const { publicKey } = req.body;
+    
+    try {
+        await UserManager.updatePublicKey(userId, publicKey);
+        res.json({ success: true, message: "Public key updated successfully" });
+    } catch (error) {
+        Log.Error("Error updating public key:", error);
+        res.status(500).json({ success: false, message: "Error updating public key" });
+    }
+});
+
 export default router;
