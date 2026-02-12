@@ -13,10 +13,21 @@ export default function registerHandler(socket) {
             return;
         }
 
+        const status = await UserManager.getUserStatus(userId);
+
         socket.userId = userId;
         socket.userToken = userToken;
+        socket.status = status || "offline";
         socket.publicKey = await UserManager.getUserPublicKey(userId);
 
+        if(!status) {
+            await UserManager.updateStatus(userId, "online");
+            socket.status = "online";
+        }
+
         onlineSessions.set(userId, socket);
+        // Notify self + others (client expects { userId, status })
+        socket.emit('userStatus', { from: userId, userId, status: socket.status });
+        socket.broadcast.emit('userStatus', { from: userId, userId, status: socket.status });
     })
 }

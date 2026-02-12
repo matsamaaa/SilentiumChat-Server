@@ -52,6 +52,18 @@ router.get('/:userId/username', validateToken, async (req, res) => {
     }
 });
 
+router.get('/:userId/status', validateToken, async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const status = await UserManager.getUserStatus(userId);
+        res.json({ success: true, message: "User status fetched successfully", datas: { status: status || "offline" } });
+    } catch (error) {
+        Log.Error("Error retrieving user status:", error);
+        res.status(500).json({ success: false, message: "Error retrieving user status" });
+    }
+});
+
 router.get('/:userId/tag', validateToken, async (req, res) => {
     const { userId } = req.params;
     try {

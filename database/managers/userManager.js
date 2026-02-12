@@ -184,6 +184,30 @@ class UserManager {
         }
     }
 
+    static async getUserStatus(userId) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            return user ? user.status : null;
+        } catch (error) {
+            throw new Error("Database error");
+        }
+    }
+
+    static async updateStatus(userId, newStatus) {
+        try {
+            const user = await User.findOne({ uniqueId: userId });
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            user.status = newStatus;
+            await user.save();
+        }  catch (error) {
+            Log.Error("Error updating user status:", error);
+            throw new Error("Database error");
+        }
+    }
+
     static async updateEmail(userId, newEmail) {
         try {
             const user = await User.findOne({ uniqueId: userId });

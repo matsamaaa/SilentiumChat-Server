@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
     tag: { type: Number, required: true }, //mat_sama#0001
     avatar: { type: String, default: null },
 
+    status: { type: String, default: 'online' }, // [offline] -> null, online, dnd, idle, invisible
+
     email: { type: String, required: true },
     password: { type: String, required: true },
     fakePassword: { type: String, default: null },
