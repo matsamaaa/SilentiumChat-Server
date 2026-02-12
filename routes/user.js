@@ -5,6 +5,7 @@ import Log from '../utils/logs/logs.js';
 import path from 'path';
 import fs from 'fs';
 import { validateToken } from '../middleware/auth.js';
+import { onlineSessions } from '../websockets/sessions.js';
 
 const router = express.Router();
 
@@ -56,6 +57,7 @@ router.get('/:userId/status', validateToken, async (req, res) => {
     const { userId } = req.params;
 
     try {
+        if (!onlineSessions.has(userId)) return res.json({ success: true, message: "User status fetched successfully", datas: { status: "offline" } });
         const status = await UserManager.getUserStatus(userId);
         res.json({ success: true, message: "User status fetched successfully", datas: { status: status || "offline" } });
     } catch (error) {

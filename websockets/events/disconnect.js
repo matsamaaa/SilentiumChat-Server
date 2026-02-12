@@ -11,13 +11,6 @@ export default function disconnectHandler(socket) {
             return;
         }
 
-        try {
-            // Persist offline as null in DB (current convention in this codebase)
-            await UserManager.updateStatus(userId, null);
-        } catch (err) {
-            Log.Error("Failed to update status on disconnect:", err);
-        }
-
         onlineSessions.delete(userId);
         socket.broadcast.emit('userStatus', { from: userId, userId, status: 'offline' });
 
