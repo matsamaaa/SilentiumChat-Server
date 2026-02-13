@@ -39,9 +39,9 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage,
     fileFilter: (req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!allowed.includes(file.mimetype)) {
-            return cb(new Error('Only JPEG, PNG, or WEBP files are allowed'));
+            return cb(new Error('Only JPEG, PNG, WEBP, or GIF files are allowed'));
         }
         cb(null, true);
     },
@@ -156,6 +156,40 @@ router.get('/:code/icon', validateToken, async (req, res) => {
     } catch (error) {
         Log.Error("Error fetching server icon:", error);
         res.status(500).json({ success: false, message: "Error fetching server icon" });
+    }
+});
+
+router.get('/:code/banner', validateToken, async (req, res) => {
+    const { code } = req.params;
+    const user = req.user;
+    try {
+        const isMember = await ServerManager.isMemberOfServer(user, code);
+        if (!isMember) {
+            return res.status(403).json({ success: false, message: "You are not a member of this server" });
+        }
+
+        const icon = await ServerManager.getServerBanner(code);
+        if (!icon) return res.status(404).json({ success: true, message: "Server doesn't have a banner" });
+
+        const filePath = path.join(process.env.UPLOAD_DIR, 'servers', code, 'banners');
+        if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: "File not found on disk" });
+
+        const ext = path.extname(icon).toLowerCase();
+        const mimeTypes = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.webp': 'image/webp',
+            '.gif': 'image/gif'
+        };
+
+        const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+        res.setHeader("Content-Type", contentType);
+        res.sendFile(icon, { root: filePath })
+    } catch (error) {
+        Log.Error("Error fetching server banner:", error);
+        res.status(500).json({ success: false, message: "Error fetching server banner" });
     }
 });
 
