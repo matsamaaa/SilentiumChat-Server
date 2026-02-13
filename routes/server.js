@@ -107,4 +107,56 @@ router.post('/:code/icon', validateToken, upload.single('icon'), async (req, res
     }
 });
 
+router.get('/:userId/servers', validateToken, async (req, res) => {
+    const { userId } = req.params;
+
+    const user = req.user; // ID de l'utilisateur authentifié
+
+    if (user !== userId) {
+        return res.status(403).json({ success: false, message: "You are not authorized to access this user's servers" });
+    }
+
+    try {
+        const servers = await ServerManager.getServersMember(userId);
+        res.json({ success: true, message: "User's servers fetched successfully", datas: { servers } });
+    } catch (error) {
+        Log.Error("Error fetching user's servers:", error);
+        res.status(500).json({ success: false, message: "Error fetching user's servers" });
+    }
+});
+
+router.get('/:code/icon', validateToken, async (req, res) => {
+    const { code } = req.params;
+    const user = req.user;
+    try {
+        const isMember = await ServerManager.isMemberOfServer(user, code);
+        if (!isMember) {
+            return res.status(403).json({ success: false, message: "You are not a member of this server" });
+        }
+
+        const icon = await ServerManager.getServerIcon(code);
+        if (!icon) return res.status(404).json({ success: true, message: "Server doesn't have an icon" });
+
+        const filePath = path.join(process.env.UPLOAD_DIR, 'servers', code, 'icons');
+        if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: "File not found on disk" });
+
+        const ext = path.extname(icon).toLowerCase();
+        const mimeTypes = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.webp': 'image/webp',
+            '.gif': 'image/gif'
+        };
+
+        const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+        res.setHeader("Content-Type", contentType);
+        res.sendFile(icon, { root: filePath })
+    } catch (error) {
+        Log.Error("Error fetching server icon:", error);
+        res.status(500).json({ success: false, message: "Error fetching server icon" });
+    }
+});
+
 export default router;

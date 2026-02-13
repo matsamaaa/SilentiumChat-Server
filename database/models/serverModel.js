@@ -6,6 +6,7 @@ const serverSchema = new mongoose.Schema({
     code: { type: String, required: true, unique: true }, // invite code
     icon: { type: String, default: null },
     banner: { type: String, default: null },
+    members: [{ type: String, ref: 'User' }], // list of user IDs
 });
 
 const Server = mongoose.model('Server', serverSchema);

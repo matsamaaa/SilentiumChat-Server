@@ -1,4 +1,4 @@
-import Server from "../models/servers/serverModel.js";
+import Server from "../models/serverModel.js";
 import Invites from "../../utils/generate/invite.js";
 
 class ServerManager {
@@ -11,7 +11,8 @@ class ServerManager {
                 owner,
                 code,
                 icon,
-                banner
+                banner,
+                members: [owner]
             });
 
             await server.save();
@@ -34,6 +35,15 @@ class ServerManager {
         try {
             const server = await Server.findOne({ owner, code });
             return server;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async isMemberOfServer(userId, code) {
+        try {
+            const server = await Server.findOne({ code, members: userId });
+            return !!server;
         } catch (error) {
             throw error;
         }
@@ -62,6 +72,64 @@ class ServerManager {
             );
 
             return server;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async addMemberToServer(code, userId) {
+        try {
+            const server = await Server.findOneAndUpdate(
+                { code },
+                { $addToSet: { members: userId } }, // addToSet prevents duplicates
+                { new: true }
+            );
+            return server;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async removeMemberFromServer(code, userId) {
+        try {
+            const server = await Server.findOneAndUpdate(
+                { code },
+                { $pull: { members: userId } },
+                { new: true }
+            );
+            return server;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getServersMember(userId) {
+        try {
+            const servers = await Server.find({
+                $or: [
+                    { owner: userId },
+                    { members: userId }
+                ]
+            });
+            return servers;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getServerIcon(code) {
+        try {
+            const server = await Server.findOne({ code });
+            return server ? server.icon : null;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getServerBanner(code) {
+        try {
+            const server = await Server.findOne({ code });
+            return server ? server.banner : null;
         } catch (error) {
             throw error;
         }
