@@ -193,4 +193,23 @@ router.get('/:code/banner', validateToken, async (req, res) => {
     }
 });
 
+router.post('/:code/channel/create', validateToken, async (req, res) => {
+    const id = req.user;
+    const { name, description } = req.body;
+    const { code } = req.params;
+
+    const server = await ServerManager.getServerByOwnerAndCode(id, code);
+    if (!server) {
+        return res.status(403).json({ success: false, message: "You are not the owner of this server" });
+    }
+
+    try {
+        const channel = await ServerManager.createServerChannel(code, name, description);
+
+        res.json({ success: true, message: 'Channel has been correctly created', datas: { channel: channel } })
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error creating channel" });
+    }
+})
+
 export default router;

@@ -1,6 +1,6 @@
 import Server from "../models/serverModel.js";
 import Invites from "../../utils/generate/invite.js";
-
+import Ids from '../../utils/generate/ids.js'
 class ServerManager {
 
     static async createServer({ name, owner, icon, banner }) {
@@ -130,6 +130,26 @@ class ServerManager {
         try {
             const server = await Server.findOne({ code });
             return server ? server.banner : null;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async createServerChannel(code, name, description) {
+        try {
+            const channel = {
+                id: Ids.generateLongId(),
+                name,
+                description
+            }
+
+            await Server.findOneAndUpdate(
+                { code },
+                { $addToSet: { channels: channel } },
+                { new: true }
+            )
+
+            return channel
         } catch (error) {
             throw error;
         }
